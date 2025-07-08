@@ -1,14 +1,24 @@
-{ lib, stdenv, fetchurl, autoPatchelfHook, libz, libgcc }:
-stdenv.mkDerivation {
-  name = "beyond-identity";
+{ lib, binutils, stdenv, fetchurl, autoPatchelfHook, libz, libgcc }:
+let
+  version = "2.104.0-4";
+in
+stdenv.mkDerivation rec {
+  inherit version;
+  pname = "beyond-identity-unwrapped";
   src = fetchurl {
-    url = "https://packages.beyondidentity.com/public/linux-authenticator/deb/ubuntu/pool/noble/main/b/be/beyond-identity_2.104.0-4/beyond-identity_2.104.0-4_amd64.deb";
-    hash = "sha256-lKnDk4lJSawhcl+3jsxmU+oeKaQOnbVwIlIoDX6ZDDU=";
+    name = "beyond-identity_${version}_amd64";
+    url = "https://packages.beyondidentity.com/public/linux-authenticator/deb/ubuntu/pool/noble/main/b/be/beyond-identity_2.104.0-4/beyond-identity_${version}_amd64.deb";
+    # hash = lib.fakeHash;
+    hash = "sha256-BeB8/O0/0EijD7jQ984yB2/QgW1NpKdpTpw/Mptc+C4=";
+    # hash = "sha256-lKnDk4lJSawhcl+3jsxmU+oeKaQOnbVwIlIoDX6ZDDU=";
+    recursiveHash = true;
+    downloadToTemp = true;
+    postFetch = ''
+      mkdir $out
+      cd $out
+      ${binutils}/bin/ar x $downloadedFile
+    '';
   };
-
-  unpackPhase = ''
-    ar x ${./beyond-identity_2.100.2-0_amd64.deb}
-  '';
 
   nativeBuildInputs = [
     autoPatchelfHook
@@ -23,6 +33,7 @@ stdenv.mkDerivation {
     runHook preInstall
     mkdir $out
     tar xf ./data.tar.gz -C $out
+    mv $out/usr/bin $out/bin
     runHook postInstall
   '';
 }

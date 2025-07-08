@@ -16,12 +16,12 @@
 
       packages.default = pkgs.buildFHSEnv
         {
-          name = "beyond-identity-wrap";
+          pname = "beyond-identity";
+          version = self.packages.${system}.authenticator.version;
           targetPkgs = pkgs: ([
             self.packages.${system}.authenticator
           ]);
-          # runScript = "${self.packages.${system}.authenticator}/usr/bin/beyond-identity";
-          runScript = "bash";
+          runScript = "${self.packages.${system}.authenticator}/bin/beyond-identity";
         };
 
       packages.authenticator = pkgs.callPackage ./beyond-identity.nix { };
@@ -29,6 +29,5 @@
       devShells.default = with pkgs; mkShell {
         inputsFrom = [ self.packages.${system}.default ];
       };
-
     });
 }
